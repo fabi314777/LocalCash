@@ -1,0 +1,54 @@
+-- LocalCash - Base de datos MySQL / MariaDB (Parte I)
+CREATE DATABASE IF NOT EXISTS localcash CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE localcash;
+
+CREATE TABLE IF NOT EXISTS usuarios (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(120) NOT NULL UNIQUE,
+  password_hash VARCHAR(100) NOT NULL,
+  creado TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS contactos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT NOT NULL,
+  nombre VARCHAR(100) NOT NULL,
+  telefono VARCHAR(30) NULL,
+  FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS cuentas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT NOT NULL,
+  nombre VARCHAR(100) NOT NULL,
+  saldo_inicial DECIMAL(14,2) NOT NULL DEFAULT 0,
+  FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS movimientos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT NOT NULL,
+  cuenta_id INT NOT NULL,
+  tipo ENUM('I','E') NOT NULL,
+  monto DECIMAL(14,2) NOT NULL,
+  descripcion VARCHAR(255) NULL,
+  lat DOUBLE NULL,
+  lon DOUBLE NULL,
+  fecha DATE NOT NULL,
+  FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+  FOREIGN KEY (cuenta_id) REFERENCES cuentas(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS compras (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT NOT NULL,
+  descripcion VARCHAR(255) NOT NULL,
+  monto DECIMAL(14,2) NOT NULL,
+  fecha DATE NOT NULL,
+  estado ENUM('AGENDADA','REALIZADA') NOT NULL DEFAULT 'REALIZADA',
+  contacto_id INT NULL,
+  lat DOUBLE NULL,
+  lon DOUBLE NULL,
+  FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+  FOREIGN KEY (contacto_id) REFERENCES contactos(id) ON DELETE SET NULL
+);
